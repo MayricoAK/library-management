@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { 
-    getAllMembers, 
-    getBorrowedBooksCount, 
-} = require('../controllers/Member');
+const memberController = require('../controllers/Member');
 
-router.get('/', getAllMembers);
-router.get('/:code', getBorrowedBooksCount);
+router.get('/', memberController.getAllMembers);
+router.post('/', memberController.addNewMember);
+router.delete('/', memberController.deleteExistMember);
+router.get('/:code', memberController.getBorrowedBooksCount);
 
 module.exports = router;

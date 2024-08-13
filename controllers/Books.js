@@ -7,7 +7,7 @@ const {
 } = require('../utils');
 
 // Get all available books
-exports.getAllAvailableBooks = async (req, res) => {
+exports.getAvailableBooks = async (req, res) => {
   try {
     const books = await Book.find({ borrowedBy: null });
   res.status(200).json({data: books});
@@ -91,5 +91,41 @@ exports.returnBook = async (req, res) => {
     res.status(200).json({ message: 'Book is returned', book});
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+};
+
+// Add new book
+exports.addNewBooks = async (req, res) => {
+  try {
+    const { code, title, author } = req.body;
+
+    // Check if the book already exists
+    const existingBook = await Book.findOne({ code });
+    if (existingBook) {
+      return res.status(400).json({ message: 'Book already exists' });
+    }
+
+    const newBook = new Book({ code, title, author });
+    await newBook.save();
+
+    res.status(201).json({ message: 'New book added', book: newBook });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Delete an existing book
+exports.deleteExistBook = async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    const book = await Book.findOneAndDelete({ code });
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+
+    res.status(200).json({ message: 'Book deleted', book });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
