@@ -3,8 +3,8 @@ const Member = require('../models/Members');
 const { 
   calculateDaysDifference, 
   penaltyDate,
+  validateMember
 } = require('../utils');
-// const moment = require('moment');
 
 // Get all available books
 exports.getAllAvailableBooks = async (req, res) => {
@@ -24,12 +24,15 @@ exports.borrowBook = async (req, res) => {
     const formattedBorrowedDate = new Date(borrowedDate.split('-').reverse().join('-'));
 
     const member = await Member.findOne({ code });
-    if (!member) return res.status(404).json({ message: 'Member not found' });
-    if (member.borrowedBooks.length >= 2) {
-      return res.status(400).json({ message: 'Member cannot borrow more than 2 books' });
+    // menghapus penalty jika borrowedDate > penaltyEndDate
+    if (new Date(member.penaltyEndDate) > new Date()) {
+      member.penaltyEndDate=null;
+      await member.save();
     }
-    if (member.penaltyEndDate) {
-      return res.status(400).json({ message: 'Member is currently penalized', endPenalty: member.penaltyEndDate});
+
+    const memberValidation = validateMember(member);
+    if (!memberValidation.isValid) {
+      return res.status(memberValidation.status).json({ message: memberValidation.message, endPenalty: memberValidation.endPenalty });
     }
 
     const book = await Book.findOne({ code: bookCode });
@@ -72,9 +75,12 @@ exports.returnBook = async (req, res) => {
       const formattedPenaltyDate = new Date(overDate);
       member.penaltyEndDate = formattedPenaltyDate;
     }
+    if (book.borrowDate > formattedReturnedDate) {
+      return res.status(400).json({ message: 'Returned Date is invalid, must be newer than Borrowed Date' });
+    }
 
     book.borrowedBy = null;
-    book.borrowedDate = null;
+    book.borrowDate = null;
     await book.save();
 
     member.borrowedBooks = member.borrowedBooks.filter(
