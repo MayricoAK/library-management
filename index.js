@@ -3,17 +3,18 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const bookRoutes = require('./routes/Books');
 const memberRoutes = require('./routes/Member');
-const Member = require('./models/Members');
-const Book = require('./models/Books');
-const { booksData, membersData } = require('./data/index');
-
+const setupSwaggerDocs = require('./docs/swagger');
 const app = express();
+
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+
+// Setup Swagger
+setupSwaggerDocs(app);
 
 // Routes
 app.use('/books', bookRoutes);

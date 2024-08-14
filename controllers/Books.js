@@ -1,10 +1,6 @@
 const Book = require('../models/Books');
 const Member = require('../models/Members');
-const { 
-  calculateDaysDifference, 
-  penaltyDate,
-  validateMember
-} = require('../utils');
+const utils = require('../utils');
 
 // Get all available books
 exports.getAvailableBooks = async (req, res) => {
@@ -25,23 +21,24 @@ exports.borrowBook = async (req, res) => {
 
     const member = await Member.findOne({ code });
     // menghapus penalty jika borrowedDate > penaltyEndDate
-    if (new Date(member.penaltyEndDate) > new Date()) {
-      member.penaltyEndDate=null;
+    if (member.penaltyEndDate && new Date(member.penaltyEndDate) < new Date()) {
+      member.penaltyEndDate = null;
       await member.save();
-    }
+    }    
 
-    const memberValidation = validateMember(member);
+    const memberValidation = utils.validateMember(member);
     if (!memberValidation.isValid) {
       return res.status(memberValidation.status).json({ message: memberValidation.message, endPenalty: memberValidation.endPenalty });
     }
 
     const book = await Book.findOne({ code: bookCode });
-    if (!book || book.borrowedBy) {
-      return res.status(400).json({ message: 'Book not available for borrowing' });
+    if (!book || book.borrowedBy || book.stock == 0) {
+      return res.status(400).json({ message: 'Book is not available' });
     }
 
     book.borrowedBy = member._id;
-    book.borrowDate = formattedBorrowedDate;  // Simpan tanggal dengan format yang benar
+    book.borrowDate = formattedBorrowedDate;
+    book.stock = book.stock-1;
     await book.save();
 
     member.borrowedBooks.push(book._id);
@@ -68,10 +65,10 @@ exports.returnBook = async (req, res) => {
       return res.status(400).json({ message: 'This member has not borrowed this book' });
     }
 
-    const daysBorrowed = calculateDaysDifference(book.borrowDate, formattedReturnedDate);
+    const daysBorrowed = utils.calculateDaysDifference(book.borrowDate, formattedReturnedDate);
     if (daysBorrowed >= 7) {
       // Menambahkan penalti 3 hari
-      const overDate = penaltyDate(returnedDate); // Menggunakan format dd-mm-yyyy
+      const overDate = utils.penaltyDate(returnedDate);
       const formattedPenaltyDate = new Date(overDate);
       member.penaltyEndDate = formattedPenaltyDate;
     }
@@ -81,6 +78,7 @@ exports.returnBook = async (req, res) => {
 
     book.borrowedBy = null;
     book.borrowDate = null;
+    book.stock = book.stock + 1;
     await book.save();
 
     member.borrowedBooks = member.borrowedBooks.filter(
@@ -97,7 +95,7 @@ exports.returnBook = async (req, res) => {
 // Add new book
 exports.addNewBooks = async (req, res) => {
   try {
-    const { code, title, author } = req.body;
+    const { code, title, author, stock } = req.body;
 
     // Check if the book already exists
     const existingBook = await Book.findOne({ code });
@@ -105,7 +103,7 @@ exports.addNewBooks = async (req, res) => {
       return res.status(400).json({ message: 'Book already exists' });
     }
 
-    const newBook = new Book({ code, title, author });
+    const newBook = new Book({ code, title, author, stock });
     await newBook.save();
 
     res.status(201).json({ message: 'New book added', book: newBook });
