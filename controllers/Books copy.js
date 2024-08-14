@@ -2,16 +2,6 @@ const Book = require('../models/Books');
 const Member = require('../models/Members');
 const utils = require('../utils');
 
-// Get all existing books
-exports.getAllBooks = async (req, res) => {
-  try {
-    const books = await Book.find();
-    res.status(200).json({data: books});
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
 // Get all available books
 exports.getAvailableBooks = async (req, res) => {
   try {

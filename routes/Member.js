@@ -40,7 +40,7 @@ router.post('/', memberController.addNewMember);
  * @swagger
  * /members/{code}:
  *   get:
- *     summary: Get borrowed books count by member
+ *     summary: Get detail of specified member
  *     parameters:
  *       - in: path
  *         name: code
@@ -49,9 +49,9 @@ router.post('/', memberController.addNewMember);
  *           type: string
  *     responses:
  *       200:
- *         description: Count of borrowed books by the member
+ *         description: Detail of specified member
  */
-router.get('/:code', memberController.getBorrowedBooksCount);
+router.get('/:code', memberController.getDetailMember);
 
 /**
  * @swagger

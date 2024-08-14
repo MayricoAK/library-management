@@ -32,8 +32,8 @@ mongoose.connect(process.env.MONGO_URL, {
 })
 .then(async () => {
   console.log('Connected to MongoDB');
-
-  // insert data into the database (for first time)
+  
+  // insert data into the database (for first time run)
   // await Book.insertMany(booksData);
   // console.log('Books data inserted');
   // await Member.insertMany(membersData);

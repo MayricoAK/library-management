@@ -6,7 +6,24 @@ const booksController = require('../controllers/Books');
  * @swagger
  * /books:
  *   get:
- *     summary: Get all available books
+ *     summary: Get all books
+ *     responses:
+ *       200:
+ *         description: List of all existing books
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Book'
+ */
+router.get('/', booksController.getAllBooks);
+
+/**
+ * @swagger
+ * /books/available:
+ *   get:
+ *     summary: Get unborrowed books / all available books
  *     responses:
  *       200:
  *         description: List of available books
@@ -17,7 +34,7 @@ const booksController = require('../controllers/Books');
  *               items:
  *                 $ref: '#/components/schemas/Book'
  */
-router.get('/', booksController.getAvailableBooks);
+router.get('/available', booksController.getAvailableBooks);
 
 /**
  * @swagger
