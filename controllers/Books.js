@@ -6,7 +6,7 @@ const utils = require('../utils');
 exports.getAvailableBooks = async (req, res) => {
   try {
     const books = await Book.find({ borrowedBy: null });
-  res.status(200).json({data: books});
+    res.status(200).json({data: books});
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

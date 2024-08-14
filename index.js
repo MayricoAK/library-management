@@ -8,6 +8,11 @@ const app = express();
 
 dotenv.config();
 
+const Book = require('./models/Books');
+const Member = require('./models/Members');
+
+const {booksData, membersData} = require('./data/index')
+
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -35,9 +40,12 @@ mongoose.connect(process.env.MONGO_URL, {
   // console.log('Members data inserted');
 
   app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
+  module.exports = { app};
 })
 .catch(err => console.error('Could not connect to MongoDB', err));
 
 app.get('/', (req, res) => {
   res.send('<h1>ACCESS, FLASH!</h1>');
 });
+
+module.exports = app;
