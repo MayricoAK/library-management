@@ -40,7 +40,6 @@ mongoose.connect(process.env.MONGO_URL, {
   // console.log('Members data inserted');
 
   app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
-  module.exports = { app};
 })
 .catch(err => console.error('Could not connect to MongoDB', err));
 

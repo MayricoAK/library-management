@@ -23,7 +23,7 @@ router.get('/', booksController.getAllBooks);
  * @swagger
  * /books/available:
  *   get:
- *     summary: Get unborrowed books / all available books
+ *     summary: Get unborrowed books / available books
  *     responses:
  *       200:
  *         description: List of available books
@@ -49,7 +49,9 @@ router.get('/available', booksController.getAvailableBooks);
  *             $ref: '#/components/schemas/Book'
  *     responses:
  *       201:
- *         description: Book added successfully
+ *         description: New book added
+ *       400:
+ *         description: Book already exists
  */
 router.post('/', booksController.addNewBooks);
 
@@ -60,13 +62,15 @@ router.post('/', booksController.addNewBooks);
  *     summary: Delete a book
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: code
  *         required: true
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Book deleted successfully
+ *         description: Book deleted
+ *       404:
+ *         description: Book not found
  */
 router.delete('/:code', booksController.deleteExistBook);
 
@@ -91,7 +95,11 @@ router.delete('/:code', booksController.deleteExistBook);
  *                 format: date
  *     responses:
  *       200:
- *         description: Book borrowed successfully
+ *         description: Book is borrowed
+ *       400:
+ *         description: Member cannot borrow more than 2 books / Member is currently penalized / Book is not available
+ *       404:
+ *         description: Member not found
  */
 router.post('/borrow', booksController.borrowBook);
 
@@ -116,7 +124,11 @@ router.post('/borrow', booksController.borrowBook);
  *                 format: date
  *     responses:
  *       200:
- *         description: Book returned successfully
+ *         description: Book is returned / Book returned is late, penalized member for 3 days
+ *       400:
+ *         description: This member has not borrowed this book / Returned Date is invalid, must be newer than Borrowed Date
+ *       404:
+ *         description: Member not found
  */
 router.post('/return', booksController.returnBook);
 

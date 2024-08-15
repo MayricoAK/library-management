@@ -22,51 +22,51 @@ exports.getAvailableBooks = async (req, res) => {
   }
 };
 
+// borrow book
 exports.borrowBook = async (req, res) => {
   try {
     const { code, bookCode, borrowedDate } = req.body;
 
-    // Konversi tanggal ke format yyyy-mm-dd
-    const formattedBorrowedDate = new Date(borrowedDate.split('-').reverse().join('-'));
-
     const member = await Member.findOne({ code });
-    // menghapus penalty jika borrowedDate > penaltyEndDate
-    if (member.penaltyEndDate && new Date(member.penaltyEndDate) < new Date()) {
+    // penalty date validation
+    if (member.penaltyEndDate && new Date(member.penaltyEndDate) < borrowedDate) {
       member.penaltyEndDate = null;
       await member.save();
-    }    
+    }
 
+    // status validation
     const memberValidation = utils.validateMember(member);
     if (!memberValidation.isValid) {
       return res.status(memberValidation.status).json({ message: memberValidation.message, endPenalty: memberValidation.endPenalty });
     }
 
+    // get book from db
     const book = await Book.findOne({ code: bookCode });
-    if (!book || book.borrowedBy || book.stock == 0) {
+    if (!book || book.borrowedBy || book.stock === 0) {
       return res.status(400).json({ message: 'Book is not available' });
     }
 
+    // borrowed data
     book.borrowedBy = member._id;
-    book.borrowDate = formattedBorrowedDate;
-    book.stock = book.stock-1;
+    book.borrowDate = borrowedDate;
+    book.stock -= 1; // decrease every borrowed book
     await book.save();
 
     member.borrowedBooks.push(book._id);
     await member.save();
 
-    res.status(200).json({message: 'Book is borrowed', book});
+    res.status(200).json({ message: 'Book is borrowed', book });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
+// return book
 exports.returnBook = async (req, res) => {
   try {
     const { code, bookCode, returnedDate } = req.body;
 
-    // Konversi tanggal ke format yyyy-mm-dd
-    const formattedReturnedDate = new Date(returnedDate.split('-').reverse().join('-'));
-
+    // validationn
     const member = await Member.findOne({ code });
     if (!member) return res.status(404).json({ message: 'Member not found' });
 
@@ -74,32 +74,32 @@ exports.returnBook = async (req, res) => {
     if (!book) {
       return res.status(400).json({ message: 'This member has not borrowed this book' });
     }
+    if (new Date(book.borrowDate) > new Date(returnedDate)) {
+      return res.status(400).json({ message: 'Returned Date is invalid, must be newer than Borrowed Date' });
+    }
 
-    const daysBorrowed = utils.calculateDaysDifference(book.borrowDate, formattedReturnedDate);
+    // checking returned status && validation
+    const daysBorrowed = utils.calculateDaysDifference(book.borrowDate, returnedDate);
     if (daysBorrowed >= 7) {
-      // Menambahkan penalti 3 hari
-      const overDate = utils.penaltyDate(returnedDate);
-      const formattedPenaltyDate = new Date(overDate);
-      member.penaltyEndDate = formattedPenaltyDate;
+      const penaltyDate = utils.addPenaltyDays(returnedDate, 3);
+      member.penaltyEndDate = penaltyDate;
 
       book.borrowedBy = null;
       book.borrowDate = null;
-      book.stock = book.stock + 1;
+      book.stock += 1;
       await book.save();
 
       member.borrowedBooks = member.borrowedBooks.filter(
         (bookId) => bookId.toString() !== book._id.toString()
       );
       await member.save();
-      res.status(200).json({ message: 'Book returned is late, got penalized 3 days', book});
-    }
-    if (book.borrowDate > formattedReturnedDate) {
-      return res.status(400).json({ message: 'Returned Date is invalid, must be newer than Borrowed Date' });
+
+      return res.status(200).json({ message: 'Book returned is late, penalized member for 3 days', book });
     }
 
     book.borrowedBy = null;
     book.borrowDate = null;
-    book.stock = book.stock + 1;
+    book.stock += 1;
     await book.save();
 
     member.borrowedBooks = member.borrowedBooks.filter(
@@ -107,7 +107,7 @@ exports.returnBook = async (req, res) => {
     );
     await member.save();
 
-    res.status(200).json({ message: 'Book is returned', book});
+    res.status(200).json({ message: 'Book is returned', book });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

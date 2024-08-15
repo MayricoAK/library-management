@@ -15,7 +15,7 @@ describe('Members can borrow books with conditions', () => {
         .send({
             code: 'M001', 
             bookCode: 'JK-45', 
-            borrowedDate: '2024-08-01'
+            borrowedDate: '01-08-2024'
         });
       expect(200);
 
@@ -24,7 +24,7 @@ describe('Members can borrow books with conditions', () => {
         .send({
             code: 'M001', 
             bookCode: 'SHR-1', 
-            borrowedDate: '2024-08-02'
+            borrowedDate: '02-08-2024'
         });
       expect(200);
       });
@@ -34,7 +34,7 @@ describe('Members can borrow books with conditions', () => {
         .send({
             code: 'M001', 
             bookCode: 'TW-11', 
-            borrowedDate: '2024-08-03'
+            borrowedDate: '03-08-2024'
         });
       expect(400);
     });
@@ -47,7 +47,7 @@ describe('Member returns the book with conditions', () => {
         .send({
             code: 'M001', 
             bookCode: 'JK-45', 
-            returnedDate: '2024-08-02'
+            returnedDate: '02-08-2024'
         });
       expect(200);
     });
@@ -58,7 +58,7 @@ describe('Member returns the book with conditions', () => {
         .send({
             code: 'M001', 
             bookCode: 'SHR-1', 
-            returnedDate: '2024-08-12'
+            returnedDate: '12-08-2024'
         });
       expect(200);
     });
@@ -69,7 +69,7 @@ describe('Member returns the book with conditions', () => {
         .send({
             code: 'M001', 
             bookCode: 'SHR-1', 
-            returnedDate: '2024-08-12'
+            returnedDate: '12-08-2024'
         });
       expect(200);
     });

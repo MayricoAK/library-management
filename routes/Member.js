@@ -32,7 +32,9 @@ router.get('/', memberController.getAllMembers);
  *             $ref: '#/components/schemas/Member'
  *     responses:
  *       201:
- *         description: Member added successfully
+ *         description: New member added
+ *       400:
+ *         description: Member already exists
  */
 router.post('/', memberController.addNewMember);
 
@@ -50,6 +52,8 @@ router.post('/', memberController.addNewMember);
  *     responses:
  *       200:
  *         description: Detail of specified member
+ *       404:
+ *         description: Member not found
  */
 router.get('/:code', memberController.getDetailMember);
 
@@ -66,7 +70,9 @@ router.get('/:code', memberController.getDetailMember);
  *           type: string
  *     responses:
  *       200:
- *         description: Member deleted successfully
+ *         description: Member deleted
+ *       404:
+ *         description: Member not found
  */
 router.delete('/:code', memberController.deleteExistMember);
 
