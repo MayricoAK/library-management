@@ -44,19 +44,19 @@ Using Express.js and MongoDB
 ## API Endpoints
 The API provides the following endpoints:
 
-   Books
-   GET /books: Retrieve a list of all books.
-   GET /books/available: Retrieve a list of available (unborrowed) books.
-   POST /books: Add a new book.
-   DELETE /books/{code}: Delete a book by code.
-   POST /books/borrow: Borrow a book.
-   POST /books/return: Return a borrowed book.
+### Books
+   - GET /books: Retrieve a list of all books.
+   - GET /books/available: Retrieve a list of available (unborrowed) books.
+   - POST /books: Add a new book.
+   - DELETE /books/{code}: Delete a book by code.
+   - POST /books/borrow: Borrow a book.
+   - POST /books/return: Return a borrowed book.
   
-   Members
-   GET /members: Retrieve a list of all members.
-   POST /members: Add a new member.
-   GET /members/{code}: Get details of a specific member.
-   DELETE /members/{code}: Delete a member by code.
+### Members
+   - GET /members: Retrieve a list of all members.
+   - POST /members: Add a new member.
+   - GET /members/{code}: Get details of a specific member.
+   - DELETE /members/{code}: Delete a member by code.
    
 ## API Documentation
 The API documentation is generated using Swagger
